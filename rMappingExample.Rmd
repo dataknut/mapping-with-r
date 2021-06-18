@@ -1,0 +1,210 @@
+---
+title: "Maps in R"
+subtitle: "A very simple introduction"
+author: "Ben Anderson & Tom Rushby (ECCD)"
+date: 'Last run at: `r Sys.time()`'
+output:
+  bookdown::html_document2:
+    fig_caption: yes
+    code_folding: hide
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float: TRUE
+  bookdown::pdf_document2:
+    toc: yes
+    fig_caption: yes
+    number_sections: yes
+  bookdown::word_document2:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    fig_width: 5
+always_allow_html: yes
+---
+
+```{r setup, include=FALSE}
+
+# you might need to install these first
+# install.packages("sf")
+# install.packages("raster")
+# install.packages("spData")
+# remotes::install_github("Nowosad/spDataLarge")
+
+library(sf)          # classes and functions for vector data
+library(raster)      # classes and functions for raster data
+library(spData)        # load geographic data
+library(spDataLarge)   # load larger geographic data
+
+```
+
+# R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunks
+
+We like R Markdown. In this file we step through some very simple mapping functions in R/Rmd.
+
+# Geo-comp
+
+Doing maps and stuff in R.
+
+We use https://geocompr.robinlovelace.net/ a lot...
+
+# Explore 'World' maps
+
+First try using the `sf` [package](https://cran.r-project.org/web/packages/sf/index.html)'s built-in `world` data to make a simple map plot.
+
+It's worth remembering that a map is just a plot with spatial arrangements...
+
+```{r world_maps}
+head(world)
+# plot variables 3 to 6
+plot(world[3:6])
+# plot world population
+plot(world["pop"])
+```
+
+Now re-draw the population map using `ggplot2` and the `geom_sf` geometry... This will make a much [prettier map](https://www.johan-rosa.com/2019/11/13/creating-maps-with-sf-and-ggplot2/) because `ggplot2` is so cool.
+
+```{r world_maps_ggplot}
+# using ggplot
+library(ggplot2)
+ggplot2::ggplot(world) + 
+  geom_sf(aes(fill = pop/1000000)) +
+  scale_fill_continuous(name="Population (millions)",
+                        low = "green",
+                        high = "red")
+
+```
+
+That looks better...well, if we sorted out the colours and the visual dominance of 2 countries...
+
+# Local Authorities
+
+## Loading data
+
+Now we're going to load some polygon boundary data (you need internet access for this) and some energy demand data so we can link them and map them.
+
+```{r loadLAElecData}
+library(readr)
+
+# electricity consumption data at LA level
+la_elecData <- readr::read_csv("https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/946424/Subnational_electricity_consumption_statistics_2019.csv")
+```
+
+This is electricity consumption data for 2019 for English Local Authorities. What variables have we got?
+
+```{r elecLAVars}
+head(la_elecData)
+```
+
+Now load the boundary data - we will use Local Authority boundaries for the Solent region only to keep things small & easy to play with.
+
+```{r loadLABoundaries}
+# las_to_load <- c("Southampton","Portsmouth","Winchester",
+#                  "Eastleigh","Isle of Wight","Fareham",
+#                  "Gosport","Test Valley","East Hampshire",
+#                  "Havant","New Forest","Hart","Basingstoke and Deane")
+
+# we pre-saved this data in the data folder of the repo for speed
+# see getBoundaryData.R for how it works
+
+inf <- here::here("data", "boundaries", "la_solent.shp") # use here to specify the data location
+message("Loading LA geometry from ONS Open Geography API")
+
+la_sf_data <- sf::read_sf(inf)
+
+
+head(la_sf_data)
+```
+
+Which areas have we got?
+
+```{r boundaryLAAreas}
+table(la_sf_data$lad18nm)
+```
+
+## Mapping data
+
+Now we'll map/plot some of the data using the `ggplot2` approach. To do that we need to merge the boundaries and the energy data so that we can `fill` the boundaries with a colour according to one of the variables.
+
+```{r plotLAElec}
+# create a variable with the LA code and the same name as in the sf_data
+la_elecData$lad18cd <- la_elecData$`LA Code`
+# merge them
+la_merged_sf <- merge(la_sf_data, la_elecData)
+
+# plot
+ggplot2::ggplot(la_merged_sf) + 
+  geom_sf(aes(fill = Total_GWh)) +
+  scale_fill_continuous(name = "Total GWh", low = "green", high = "red")
+
+```
+
+# MSOAs
+These are census areas - smaller than LSOAs so the files are bigger and the maps are denser.
+
+## Loading data
+
+As before we're going to load some polygon boundary data (you need internet access for this) and some energy demand data so we can link them and map them.
+
+```{r loadElecMSOAData}
+# electricity consumption data at MSOA level (pre downloaded)
+inFile <- here::here("data", "energy", "MSOA_Dom_Elec", "MSOA_DOM_ELEC_2019.csv")
+msoa_elecData <- readr::read_csv(inFile)
+```
+
+This is electricity consumption data for 2019 for English Local Authorities. What variables have we got?
+
+```{r elecMSOAVars}
+head(msoa_elecData)
+```
+Clearly we are going to need to filter out the ones we don;t want...
+
+Now load the MSOA boundary data for the Solent region only to keep things small & easy to play with.
+
+We pre-downloaded these.
+
+```{r loadMSOABoundaries}
+# las_to_load <- c("Southampton","Portsmouth","Winchester",
+#                  "Eastleigh","Isle of Wight","Fareham",
+#                  "Gosport","Test Valley","East Hampshire",
+#                  "Havant","New Forest","Hart","Basingstoke and Deane")
+
+# we pre-saved this data in the data folder of the repo for speed
+# see getBoundaryData.R for how it works
+
+inf <- here::here("data", "boundaries", "msoa_solent.shp") # use here to specify the data location
+message("Loading MSOA geometry from ONS Open Geography API")
+msoa_sf_data <- sf::read_sf(inf)
+
+head(msoa_sf_data)
+```
+
+Which areas have we got and how many MSOAs are there in each?
+
+```{r boundaryMSOAAreas}
+table(msoa_sf_data$LAD11NM)
+```
+
+## Mapping data
+
+Now we'll map/plot some of the data using the `ggplot2` approach. To do that we need to merge the boundaries and the energy data so that we can `fill` the boundaries with a colour according to one of the variables.
+
+```{r plotMSOAElec}
+# create a variable with the LA code and the same name as in the sf_data
+msoa_elecData$MSOA11CD <- msoa_elecData$`Middle Layer Super Output Area (MSOA) Code`
+# merge them
+msoa_merged_sf <- merge(msoa_sf_data, msoa_elecData)
+
+# plot
+ggplot2::ggplot(msoa_merged_sf) + 
+  geom_sf(aes(fill = `Consumption (kWh)`/1000000)) +
+  scale_fill_continuous(name = "Total GWh", low = "green", high = "red")
+
+```
+
+# References
