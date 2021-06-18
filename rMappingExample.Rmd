@@ -4,6 +4,10 @@ subtitle: "A very simple introduction"
 author: "Ben Anderson & Tom Rushby (ECCD)"
 date: 'Last run at: `r Sys.time()`'
 output:
+  bookdown::pdf_document2:
+    toc: yes
+    fig_caption: yes
+    number_sections: yes
   bookdown::html_document2:
     fig_caption: yes
     code_folding: hide
@@ -11,10 +15,6 @@ output:
     toc: yes
     toc_depth: 4
     toc_float: TRUE
-  bookdown::pdf_document2:
-    toc: yes
-    fig_caption: yes
-    number_sections: yes
   bookdown::word_document2:
     fig_caption: yes
     number_sections: yes
@@ -157,7 +157,7 @@ inFile <- here::here("data", "energy", "MSOA_Dom_Elec", "MSOA_DOM_ELEC_2019.csv"
 msoa_elecData <- readr::read_csv(inFile)
 ```
 
-This is electricity consumption data for 2019 for English Local Authorities. What variables have we got?
+This is electricity consumption data for 2019 for MSOAs. What variables have we got?
 
 ```{r elecMSOAVars}
 head(msoa_elecData)
@@ -202,8 +202,8 @@ msoa_merged_sf <- merge(msoa_sf_data, msoa_elecData)
 
 # plot
 ggplot2::ggplot(msoa_merged_sf) + 
-  geom_sf(aes(fill = `Consumption (kWh)`/1000000)) +
-  scale_fill_continuous(name = "Total GWh", low = "green", high = "red")
+  geom_sf(aes(fill = `Mean consumption (kWh per meter)`)) +
+  scale_fill_continuous(name = "Mean kWh per meter", low = "green", high = "red")
 
 ```
 
