@@ -72,7 +72,8 @@ sf::write_sf(msoa_solent, outf)
 # LSOA boundaries for the Solent region ----
 # use the generalised boundaries (smaller file)
 
-# manually downloaded for now
+# manually downloaded for now from
+# https://geoportal.statistics.gov.uk/search?collection=Dataset&sort=name&tags=all(BDY_LSOA%2CDEC_2011)
 # load all LSOAs from file
 
 inFile <- path.expand("~//Dropbox/data/UK_census2011/Lower_Layer_Super_Output_Areas_(December_2011)_Boundaries_Generalised_Clipped_(BGC)_EW_V3-shp/Lower_Layer_Super_Output_Areas_(December_2011)_Boundaries_Generalised_Clipped_(BGC)_EW_V3.shp") # local version

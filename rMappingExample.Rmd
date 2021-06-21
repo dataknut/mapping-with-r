@@ -203,8 +203,76 @@ msoa_merged_sf <- merge(msoa_sf_data, msoa_elecData)
 # plot
 ggplot2::ggplot(msoa_merged_sf) + 
   geom_sf(aes(fill = `Mean consumption (kWh per meter)`)) +
-  scale_fill_continuous(name = "Mean kWh per meter", low = "green", high = "red")
+  scale_fill_continuous(name = "Mean kWh per meter", low = "green", high = "red") +
+  labs(caption = "Solent (all MSOAs)")
 
 ```
 
+# LSOAs
+
+Check this works with BEIS LSOA level electricity data.
+
+```{r loadLSOAElecData}
+inFile <- here::here("data", "energy", "LSOA_Dom_Elec", "LSOA_ELEC_2019.csv")
+lsoa_elecData <- readr::read_csv(inFile)
+
+lsoa_elecData$LSOA11CD <- lsoa_elecData$`Lower Layer Super Output Area (LSOA) Code`
+```
+
+```{r loadLSOABoundaries}
+# las_to_load <- c("Southampton","Portsmouth","Winchester",
+#                  "Eastleigh","Isle of Wight","Fareham",
+#                  "Gosport","Test Valley","East Hampshire",
+#                  "Havant","New Forest","Hart","Basingstoke and Deane")
+
+# we pre-saved this data in the data folder of the repo for speed
+# sourced from: https://geoportal.statistics.gov.uk/search?collection=Dataset&sort=name&tags=all(BDY_LSOA%2CDEC_2011)
+
+# see getBoundaryData.R for how it works
+
+inf <- here::here("data", "boundaries", "lsoa_solent.shp") # use here to specify the data location
+message("Loading LSOA geometry from file")
+
+lsoa_sf_data <- sf::read_sf(inf)
+
+
+head(lsoa_sf_data)
+```
+
+Which areas have we got and how many MSOAs are there in each?
+
+```{r boundaryLSOAAreas}
+table(lsoa_sf_data$LAD11NM)
+```
+
+## Mapping data
+
+Now we'll map/plot some of the data using the `ggplot2` approach. To do that we need to merge the boundaries and the energy data so that we can `fill` the boundaries with a colour according to one of the variables.
+
+```{r plotLSOAElec}
+
+lsoa_merged_sf <- merge(lsoa_sf_data, lsoa_elecData)
+
+# plot
+ggplot2::ggplot(lsoa_merged_sf) + 
+  geom_sf(aes(fill = `Mean domestic electricity consumption \n(kWh per meter)`)) +
+  scale_fill_continuous(name = "Mean kWh per meter", low = "green", high = "red") +
+  labs(caption = "Solent (all LSOAs)")
+
+```
+Cities disappear due to the density of boundaries. As an example, this is the map for just Southampton.
+
+
+```{r plotLSOAElecSoton}
+
+library(dplyr) # for filter
+mapData <- dplyr::filter(lsoa_merged_sf, LAD11NM == "Southampton")
+
+# plot
+ggplot2::ggplot(mapData) + 
+  geom_sf(aes(fill = `Mean domestic electricity consumption \n(kWh per meter)`)) +
+  scale_fill_continuous(name = "Mean kWh per meter", low = "green", high = "red") +
+  labs(caption = "Southampton")
+
+```
 # References
