@@ -145,7 +145,7 @@ ggplot2::ggplot(la_merged_sf) +
 ```
 
 # MSOAs
-These are census areas - smaller than LSOAs so the files are bigger and the maps are denser.
+These are census areas - smaller than LAs so the files are bigger and the maps are denser.
 
 ## Loading data
 
