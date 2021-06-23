@@ -56,8 +56,9 @@ oa_solentLut[, .(nOAs = .N), keyby = .(LAD11NM)]
 
 # collapse the OA level file to an MSOA level file
 msoa_solentLut <- oa_solentLut[, .(nOAs = .N), 
-                               keyby = .(MSOA11CD, MSOA11NM , LAD11CD, LAD11NM )]
-msoa_solentLut[, .(nOAs = .N), keyby = .(LAD11NM)]
+                               keyby = .(MSOA11CD, # smallest geography to collapse to, include the others for reference
+                                         MSOA11NM , LAD11CD, LAD11NM )]
+msoa_solentLut[, .(nOAs = .N), keyby = .(LAD11NM)] # count them
 
 # merge the MSOA level file with the MSOA level shape file
 msoa_solent <- merge(msoa_all_sf, msoa_solentLut)
@@ -79,36 +80,16 @@ sf::write_sf(msoa_solent, outf)
 inFile <- path.expand("~//Dropbox/data/UK_census2011/Lower_Layer_Super_Output_Areas_(December_2011)_Boundaries_Generalised_Clipped_(BGC)_EW_V3-shp/Lower_Layer_Super_Output_Areas_(December_2011)_Boundaries_Generalised_Clipped_(BGC)_EW_V3.shp") # local version
 lsoa_all_sf <- sf::read_sf(inFile)
 
-# load the look up table so we can filter
-lutFile <- here::here("data", "Output_Area_to_Lower_Layer_Super_Output_Area_to_Middle_Layer_Super_Output_Area_to_Local_Authority_District_(December_2011)_Lookup_in_England_and_Wales.csv")
-
-oa_lut <- data.table::fread(lutFile)
-
 # las_to_load <- c("Southampton","Portsmouth","Winchester",
 #                  "Eastleigh","Isle of Wight","Fareham",
 #                  "Gosport","Test Valley","East Hampshire",
 #                  "Havant","New Forest","Hart","Basingstoke and Deane")
 
-# select the OAs we want via LAs
-oa_solentLut <- oa_lut[LAD11NM == "Southampton" | 
-                         LAD11NM == "Portsmouth" |
-                         LAD11NM == "Winchester" |
-                         LAD11NM == "Eastleigh" |
-                         LAD11NM == "Isle of Wight" |
-                         LAD11NM == "Fareham" |
-                         LAD11NM == "Gosport" |
-                         LAD11NM == "Test Valley" |
-                         LAD11NM == "East Hampshire" |
-                         LAD11NM == "Havant" |
-                         LAD11NM == "New Forest" |
-                         LAD11NM == "Hart" |
-                         LAD11NM == "Basingstoke and Deane"]
-
-
-# collapse the OA level file to an LSOA level file
+# collapse the OA level file we made esrlier to an LSOA level file
 lsoa_solentLut <- oa_solentLut[, .(nLSOAs = .N), 
-                               keyby = .(LSOA11CD, MSOA11CD, MSOA11NM , LAD11CD, LAD11NM )]
-lsoa_solentLut[, .(nOAs = .N), keyby = .(LAD11NM)]
+                               keyby = .(LSOA11CD, # smallest geography to collapse to, include the others for reference
+                                         MSOA11CD, MSOA11NM , LAD11CD, LAD11NM )]
+lsoa_solentLut[, .(nOAs = .N), keyby = .(LAD11NM)] # count them
 
 # merge the MSOA level file with the MSOA level shape file
 lsoa_solent <- merge(lsoa_all_sf, lsoa_solentLut)

@@ -19,3 +19,19 @@ A simple example of mapping using R. Examples use Local Authority (LA) and Middl
 ## ONS-open-geography
 
 An example and resources for using the [ONS Open Geography portal](https://geoportal.statistics.gov.uk) to download geographical data and create maps  using `Leaflet` package.
+
+## Resources
+
+### Openstreetmap for base maps (i.e. map tiles/rasters)
+
+ * [Edinburgh green space as an example with sf](https://ourcodingclub.github.io/tutorials/spatial-vector-sf/)
+ * [Madrid supermarkets with sf](https://dominicroye.github.io/en/2018/accessing-openstreetmap-data-with-r/)
+ * [Short term rentals in Halifax, Nova Scotia with sf](https://upgo.lab.mcgill.ca/2019/12/13/making-beautiful-maps/)
+ 
+### Google maps for base maps
+
+They want you to have an API key now. Yeah nah.
+
+### tmap package - nice - check out the bubble geom
+
+ * https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html
