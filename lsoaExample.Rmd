@@ -26,6 +26,8 @@ head(sf_data)
 
 ```
 
+Draw the map using leaflet ([useful resource](https://rstudio.github.io/leaflet/)) ...
+
 ```{r}
 # Useful lookup spatial reference for CRS
 # https://spatialreference.org/ref/epsg/27700/
@@ -84,6 +86,8 @@ Join to geography data ...
 ```{r}
 sf_data_elec <- left_join(sf_data,lsoa_elecData, by = c("LSOA11CD" = "Lower Layer Super Output Area (LSOA) Code"))
 ```
+
+And re-draw the map ...
 
 ```{r}
 # create popup first (using htmltools)
