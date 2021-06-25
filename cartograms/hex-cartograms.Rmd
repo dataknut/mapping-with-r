@@ -1,5 +1,5 @@
 ---
-title: "Non-contiguous hex-cartograms"
+title: "Non-contiguous hexograms"
 subtitle: "Local Authority and Middle-layer Super Output Area exmaples"
 author: "Tom Rushby"
 date: "25/06/2021"
@@ -8,6 +8,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(out.width = "100%")
 ```
 
 ```{r requiredPackages}
@@ -20,9 +21,11 @@ library(ggplot2)
 
 ## Introduction
 
-This example follows an example (and re-uses code) by [@VictimOfMaths](https://github.com/VictimOfMaths/Maps/blob/master/WFHCartogram.R) using hex-map data from [House of Commons Library](https://github.com/houseofcommonslibrary/uk-hex-cartograms-noncontiguous/) by [@carlbaker](https://twitter.com/carlbaker).
+One of the problems associated with mapping area-based data is the often highly variable size of geographical areas. With data such as that provided by Census (OA, LSOA, MSOA etc) representing similar populations, the dominance of the largest areas can lead to mis-interpretation (and potential overlooking of smaller areas). Cartograms have been used to resize areas in accordance with other attributes such as population. For more background and creating hexograms in R see [Hexograms: better maps of area based data](https://rstudio-pubs-static.s3.amazonaws.com/342278_51068843182b41ad9e00dfcc35e65247.html). 
 
-The first example we will look at is plotting a non-contiguous hex cartogram of Local Authority areas.
+This example follows an example of creating a non-contiguous hexogram (and re-uses code) by [@VictimOfMaths](https://github.com/VictimOfMaths/Maps/blob/master/WFHCartogram.R) using hex-map geometry from [House of Commons Library](https://github.com/houseofcommonslibrary/uk-hex-cartograms-noncontiguous/).
+
+The first example we will look at is plotting a non-contiguous hexogram of Local Authority areas.
 
 ## Local Authority areas
 
