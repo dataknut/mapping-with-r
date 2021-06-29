@@ -3,10 +3,13 @@ title: "Non-contiguous hexograms"
 subtitle: "Local Authority and Middle-layer Super Output Area exmaples"
 author: "Tom Rushby"
 date: "25/06/2021"
-output: html_document
+output:
+  bookdown::html_document2: default
 ---
 
-```{r setup, include=FALSE}
+# Setup
+
+```{r setup}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(out.width = "100%")
 ```
@@ -19,9 +22,11 @@ library(ggplot2)
 ```
 
 
-## Introduction
+# Introduction
 
 One of the problems associated with mapping area-based data is the often highly variable size of geographical areas. With data such as that provided by Census (OA, LSOA, MSOA etc) representing similar populations, the dominance of the largest areas can lead to mis-interpretation (and potential overlooking of smaller areas). Cartograms have been used to resize areas in accordance with other attributes such as population. For more background and creating hexograms in R see [Hexograms: better maps of area based data](https://rstudio-pubs-static.s3.amazonaws.com/342278_51068843182b41ad9e00dfcc35e65247.html). 
+
+# Examples
 
 This example follows an example of creating a non-contiguous hexogram (and re-uses code) by [@VictimOfMaths](https://github.com/VictimOfMaths/Maps/blob/master/WFHCartogram.R) using hex-map geometry from [House of Commons Library](https://github.com/houseofcommonslibrary/uk-hex-cartograms-noncontiguous/).
 
@@ -37,13 +42,13 @@ ltla <- curl_download(url=source, destfile=ltla, quiet=FALSE, mode="wb")
 
 The file downloaded is a GeoPackage (.gpkg) file, an SQLite Database container  (see http://www.geopackage.org/guidance/getting-started.html for more info.). We can examine the layers contained using the `st_layers()` command from the sf package.
 
-```{r examineGeoLayers}
+```{r examineGeoLayers, message = FALSE, warning = FALSE}
 st_layers(ltla)
 ```
 
 Next we extract the layers we want using the `st_read` command. [Alternative methods](https://olalladiaz.net/blog/2018/11/02/working-with-gpkg-r/) are available.
 
-```{r extractGeoLayers}
+```{r extractGeoLayers, message = FALSE, warning = FALSE}
 Background <- st_read(ltla, layer="7 Background")
 
 Areas <- st_read(ltla, layer="4 LTLA-2019")
@@ -54,9 +59,9 @@ Group_labels <- st_read(ltla, layer="1 Group labels") %>%
   mutate(just=if_else(LabelPosit=="Left", 0, 1))
 ```
 
-And finally we can make a plot ... note the `Groups` geometry provides County-level grouping of local authorities and an outline (appears bold in the plot below). `Areas` provides the local authority outlines.
+And finally we can make a plot, for example Figure \@ref(fig:plotLocalAuthorities) note the `Groups` geometry provides County-level grouping of local authorities and an outline (appears bold in the plot below). `Areas` provides the local authority outlines.
 
-```{r plotLocalAuthorities}
+```{r plotLocalAuthorities, echo = FALSE, fig.cap="Non-contiguous hexogram of local authorities in Great Britain"}
 ggplot()+
   geom_sf(data=Background %>% filter(Name!="Ireland"), aes(geometry=geom)) +
   geom_sf(data=Areas %>% filter(RegionNation != "Northern Ireland"), 
@@ -72,7 +77,7 @@ ggplot()+
        caption="Cartogram by House of Commons Library\nPlot by @tom_rushby")
 ```
 
-## Middle-layer Super Output Areas
+# Middle-layer Super Output Areas
 
 Load GeoPackage file ... this time Middle-layer Super Output Areas (MSOAs) in England and Wales only.
 
@@ -84,13 +89,13 @@ msoa <- curl_download(url = source, destfile = msoa, quiet = FALSE, mode = "wb")
 
 List layers ...
 
-```{r}
+```{r message = FALSE}
 st_layers(msoa)
 ```
 
 Extract layers ...
 
-```{r}
+```{r message = FALSE, warning = FALSE}
 background_msoa <- st_read(msoa, layer="5 Background")
 msoa_la_outlines <- st_read(msoa, layer="3 Local authority outlines (2019)")
 msoa_data <- st_read(msoa, layer="4 MSOA hex")
@@ -101,9 +106,9 @@ msoa_group_labels <- st_read(msoa, layer="1 Group labels") %>%
   mutate(just=if_else(LabelPosit=="Left", 0, 1))
 ```
 
-As with the local authority example, `msoa_groups` and `msoa_la_outlines` geometries provide County- and Local Authority-level grouping/outlines (black in the plot below). `msoa_data` provides the MSOA outlines (in blue).
+Figure \@ref(fig:plotMSOA) As with the local authority example, `msoa_groups` and `msoa_la_outlines` geometries provide County- and Local Authority-level grouping/outlines (black in the plot below). `msoa_data` provides the MSOA outlines (in blue).
 
-```{r}
+```{r plotMSOA, echo = FALSE, fig.cap="Non-contiguous hexogram of local authorities in Great Britain"}
 ggplot()+
   geom_sf(data=background_msoa %>% filter(Name!="Ireland"), aes(geometry=geom))+
   geom_sf(data=msoa_data %>% filter(RegionNation!="Northern Ireland"), 
@@ -123,4 +128,19 @@ ggplot()+
        caption="Cartogram by House of Commons Library\nPlot by @tom_rushby")
 ```
 
+# Further reading and resources
 
+I cannot find LSOA level hex maps but here's some links with a more info on creating hex maps, something to try out!
+
+* Sam Langton: [Data visualisation in R: extras](https://rpubs.com/langton_/worksheet-extras-03)
+* Simon Hailstone: [Playing with the hexmapr and fingertipsR packages](https://rpubs.com/Hailstone/326118)
+* Richard Harris: [Hexograms: better maps of area based data](https://rstudio-pubs-static.s3.amazonaws.com/342278_51068843182b41ad9e00dfcc35e65247.html)
+
+Other resources ...
+
+* https://docs.evanodell.com/parlitools/ and https://docs.evanodell.com/parlitools/articles/using-cartograms.html
+
+ODI Leeds ...
+
+* https://odileeds.github.io/covid-19/LocalAuthorities/hexmap.html
+* https://github.com/odileeds/hexmaps
