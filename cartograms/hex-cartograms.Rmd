@@ -62,7 +62,7 @@ Group_labels <- st_read(ltla, layer="1 Group labels") %>%
 And finally we can make a plot, for example Figure \@ref(fig:plotLocalAuthorities) note the `Groups` geometry provides County-level grouping of local authorities and an outline (appears bold in the plot below). `Areas` provides the local authority outlines.
 
 ```{r plotLocalAuthorities, echo = FALSE, fig.cap="Non-contiguous hexogram of local authorities in Great Britain"}
-ggplot()+
+p <- ggplot()+
   geom_sf(data=Background %>% filter(Name!="Ireland"), aes(geometry=geom)) +
   geom_sf(data=Areas %>% filter(RegionNation != "Northern Ireland"), 
           aes(geometry=geom), colour="Black", size=0.2)+
@@ -75,6 +75,16 @@ ggplot()+
         legend.position="top") +
   labs(title="Local Authorities Hex-Cartogram",
        caption="Cartogram by House of Commons Library\nPlot by @tom_rushby")
+
+
+# Labels fall off plot area - expand x axis area
+# Get axis range for geo data
+# https://stackoverflow.com/questions/7705345/how-can-i-extract-plot-axes-ranges-for-a-ggplot2-object?rq=1
+x_limits <- ggplot_build(p)$layout$panel_scales_x[[1]]$range$range 
+x_limits <- ggplot_build(p)$layout$panel_scales_y[[1]]$range$range
+
+# Expand limits
+p + xlim(x_limits[1],x_limits[2])
 ```
 
 # Middle-layer Super Output Areas
