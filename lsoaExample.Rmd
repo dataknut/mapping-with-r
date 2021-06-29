@@ -1,0 +1,116 @@
+---
+title: "LSOA mapping (Solent)"
+author: "Thomas W Rushby"
+date: "24/06/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(sf)          # classes and functions for vector data
+library(ggplot2)
+library(tidyverse)
+```
+
+## Geography
+
+```{r loadGeog}
+
+inf <- here::here("data", "boundaries", "lsoa_solent.shp") # use here to specify the data location
+message("Loading LSOA geometry from file")
+
+sf_data <- sf::read_sf(inf)
+
+head(sf_data)
+
+```
+
+Draw the map using leaflet ([useful resource](https://rstudio.github.io/leaflet/)) ...
+
+```{r}
+# Useful lookup spatial reference for CRS
+# https://spatialreference.org/ref/epsg/27700/
+st_coord_sys <- st_crs(sf_data) # check coord system
+st_coord_sys # current coord system EPSG: 4326 (is what leaflet wants - good)
+
+# transform the coord system if required
+if(st_coord_sys$epsg != 4326){
+  sf_data <- st_transform(sf_data, "+proj=longlat +datum=WGS84")
+}
+
+# Create map (using leaflet) ----
+
+# create popup first (using htmltools)
+# by adding a column to sf_data object
+library(htmltools)
+sf_data$popup_text <-
+  paste("LSOA code: ","<b>", sf_data$LSOA11CD, "</b>",
+        '<br/>', 'LSOA: ', '<b>', sf_data$LSOA11NM, '</b>', ' ') %>%
+  lapply(htmltools::HTML)
+
+# plot map
+library(leaflet)
+leaflet(sf_data %>% filter(LAD11NM == "Southampton")) %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addPolygons(color = "blue", fillColor = "blue", fillOpacity = 0.2, weight = 1.5, popup = ~(LSOA11NM), # popups clicked
+              label = ~(popup_text),                                            # define labels
+              labelOptions = labelOptions(                                      # label options
+                style = list("font-weight" = "normal", padding = "2px 2px"),
+                direction = "auto"),
+              highlight = highlightOptions(
+                weight = 5,
+                color = "#666",
+                fillOpacity = 0.7,
+                bringToFront = TRUE))
+```
+
+
+## Demand model
+
+Start with current electricity demand ... we have stats for LSOAs from 2019:
+
+```{r loadLSOAdata}
+# electricity consumption data at MSOA level (pre downloaded)
+inFile <- here::here("data", "energy", "LSOA_Dom_Elec", "LSOA_ELEC_2019.csv")
+
+# fix inFile - use path to file ...
+inFile <- "/Users/twr1m15/SotonGitLab/Personal/mapping-with-r/data/energy/LSOA_Dom_Elec/LSOA_ELEC_2019.csv"
+
+lsoa_elecData <- readr::read_csv(inFile)
+head(lsoa_elecData)
+```
+
+Join to geography data ...
+
+```{r}
+sf_data_elec <- left_join(sf_data,lsoa_elecData, by = c("LSOA11CD" = "Lower Layer Super Output Area (LSOA) Code"))
+```
+
+And re-draw the map ...
+
+```{r}
+# create popup first (using htmltools)
+sf_data_elec$popup_text <-
+  paste("LSOA code: ","<b>", sf_data_elec$LSOA11CD, "</b>",
+        '<br/>', 'LSOA: ', '<b>', sf_data_elec$LSOA11NM, '</b>', 
+        '<br/>', 'kWh/meter (median): ', '<b>', round(sf_data_elec$`Median domestic electricity consumption \n(kWh per meter)`,0), '</b>', 'kWh') %>%
+  lapply(htmltools::HTML)
+
+# plot map
+qpal <- colorQuantile("Reds", sf_data_elec$`Median domestic electricity consumption \n(kWh per meter)`, n = 9)
+
+leaflet(sf_data_elec %>% filter(LAD11NM == "Southampton")) %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addPolygons(color = ~qpal(`Median domestic electricity consumption \n(kWh per meter)`),  fillOpacity = 0.7, weight = 1.5, popup = ~(LSOA11NM), # popups clicked
+              label = ~(popup_text),                                            # define labels
+              labelOptions = labelOptions(                                      # label options
+                style = list("font-weight" = "normal", padding = "2px 2px"),
+                direction = "auto"),
+              highlight = highlightOptions(
+                weight = 3,
+                color = "Red",
+                fillOpacity = 1,
+                bringToFront = TRUE))
+```
+
