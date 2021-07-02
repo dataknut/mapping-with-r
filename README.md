@@ -12,9 +12,10 @@ The following example data is provided in this repository:
 * Energy - area-based statistics for domestic electricity consumption (LSOA, MSOA)
 * Lookup table for geographies
 
-## rMappingExample
+## Examples
 
-A simple example of mapping using R. Examples use Local Authority (LA) and Middle-layer Super Output Area (MSOA) geography and electricity consumption data (provided in `data` subfolder).
+ * rMappingExample[rMappingExample.html]: A simple example of mapping using R. Examples use Local Authority (LA) and Middle-layer Super Output Area (MSOA) geographies for the Solent area and electricity consumption data (both provided in the `data` subfolder for re-use);
+ * lsoaExample[lsoaExample.Rmd]: Examples of LSOA mapping of various datasets for the Solent area.
 
 ## ONS-open-geography
 
