@@ -23,7 +23,6 @@ You link these using the relevant area level codes such as:
 ### rMappingExample
 
 A [simple example of mapping using R](rMappingExample.html). Examples use Local Authority (LA) and Middle-layer Super Output Area (MSOA) geography and electricity consumption data (provided in `data` subfolder).
->>>>>>> ea68ce4312db5b512e91afdd55cf1d412be2193f
 
 ### ONS-open-geography
 
