@@ -6,12 +6,18 @@ You might also like [https://git.soton.ac.uk/twr1m15/la_emissions_viz](https://g
 
 ## data
 
-The following example data is provided in this repository:
+The following example data is provided in the data folder of this repository:
 
-* Boundary data - for Solent region (various geographies: LA, LSOA, MSOA)
-* Energy - area-based statistics for domestic electricity consumption (LSOA, MSOA)
-* Lookup table for geographies
+* Boundary data - for Solent region (various [geographies](https://geoportal.statistics.gov.uk/): LA, LSOA, MSOA) - [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/)
+* Energy - area-based statistics for domestic [electricity consumption](https://www.gov.uk/government/collections/sub-national-electricity-consumption-data) (England & Wales: LSOA, MSOA) - Open Government Licence v3.0
+* [Lookup table](https://geoportal.statistics.gov.uk/search?collection=Dataset&sort=name&tags=all(LUP_ADM)) for English geographies - Open Government Licence v3.0
 
+You link these using the relevant area level codes such as:
+
+ * Local Authority: `LA Code`<-> `lad18cd`
+ * LSOA: `Lower Layer Super Output Area (LSOA) Code` <-> `LSOA11CD`
+ * etc
+ 
 ## Examples
 
 ### rMappingExample
@@ -39,6 +45,6 @@ What it says [on the tin](/cartograms/hex-cartograms.html)
 
 They want you to have an API key now. Yeah nah.
 
-### tmap package - nice - check out the bubble geom
+### tmap package - nice
 
- * https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html
+ * check out the [bubble geom](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html)
