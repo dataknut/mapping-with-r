@@ -4,10 +4,6 @@ subtitle: "example of using the API to get feature layer data - boundaries"
 author: "Tom Rushby (@tom_rushby)"
 date: 'Last run at: `r Sys.time()`'
 output:
-  bookdown::pdf_document2:
-    toc: yes
-    fig_caption: yes
-    number_sections: yes
   bookdown::html_document2:
     fig_caption: yes
     code_folding: hide
@@ -15,6 +11,10 @@ output:
     toc: yes
     toc_depth: 4
     toc_float: TRUE
+  bookdown::pdf_document2:
+    toc: yes
+    fig_caption: yes
+    number_sections: yes
   bookdown::word_document2:
     fig_caption: yes
     number_sections: yes
@@ -32,6 +32,7 @@ library(htmltools)
 library(leaflet)
 library(utils)
 library(dplyr)
+library(knitr)
 ```
 
 # Introduction
@@ -84,6 +85,15 @@ message("Loading LA geometry from ONS Open Geography API")
 # API query
 sf_data <- st_read(geo_query)
 ```
+
+## Data returned
+
+So what did the API query return? Table \@ref(tab:geoTable) shows selected columns from the data. The data.frame contains a row for each local authority district, with the `geometry` column containing the geography; in this case the polygon data relating to the boundary of each local authority.
+
+```{r geoTable}
+kable(sf_data[c(2:3,7:9)], caption = "Selected columns of data by API query")
+```
+
 
 ## Checking coordinate reference system
 
