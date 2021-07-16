@@ -26,7 +26,7 @@ A [simple example of mapping using R](rMappingExample.html). Examples use Local 
 
 ### ONS-open-geography
 
-An [example and resources](lsoaExample.html) for using the [ONS Open Geography portal](https://geoportal.statistics.gov.uk) to download geographical data and create maps  using `Leaflet` package.
+An [example and resources](ONS-open-geography.html) for using the [ONS Open Geography portal](https://geoportal.statistics.gov.uk) to download geographical data and create maps  using `Leaflet` package.
 
 ### fun with cartograms
 
