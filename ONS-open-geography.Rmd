@@ -6,7 +6,7 @@ date: 'Last run at: `r Sys.time()`'
 output:
   bookdown::html_document2:
     fig_caption: yes
-    code_folding: hide
+    code_folding: show
     number_sections: yes
     toc: yes
     toc_depth: 4
