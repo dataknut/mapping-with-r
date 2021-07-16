@@ -1,0 +1,136 @@
+---
+title: "Using the ONS Open Geography API"
+subtitle: "example of using the API to get feature layer data - boundaries"
+author: "Tom Rushby (@tom_rushby)"
+date: 'Last run at: `r Sys.time()`'
+output:
+  bookdown::pdf_document2:
+    toc: yes
+    fig_caption: yes
+    number_sections: yes
+  bookdown::html_document2:
+    fig_caption: yes
+    code_folding: hide
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float: TRUE
+  bookdown::word_document2:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    fig_width: 5
+always_allow_html: yes
+---
+
+```{r setup, include=FALSE}
+
+# you might need to install these first
+library(sf)   
+library(htmltools)
+library(leaflet)
+library(utils)
+library(dplyr)
+```
+
+# Introduction
+
+This script provides an example of downloading and importing administrative boundaries from the Office for National Statistics Open Geography portal into RStudio and plotting on a map. It is based upon a useful example by [Trafford Data Lab](https://medium.com/@traffordDataLab/pushing-the-boundaries-with-the-open-geography-portal-api-4d70637bddc3).
+
+## Creating a query
+
+In this example we want to load Local Authority District geography. The Open Geography portal helpfully provides an [API explorer](https://geoportal.statistics.gov.uk/datasets/ons::local-authority-districts-december-2020-uk-bgc/api) to help us structure the query.
+
+In the code chunk below, we break up the query into parts that we can change depending on the type of geography we want, the areas we want to include, the fields we want the query to return etc.
+
+```{r geoQueryElements}
+# Elements for the query
+geo_endpoint <- "https://ons-inspire.esriuk.com/arcgis/rest/services/"
+# The geo boundary layer will change depending on which 
+geo_boundarylayer <- "Administrative_Boundaries/Local_Authority_Districts_December_2020_UK_BGC/"
+geo_server <- "FeatureServer/0/"
+geo_search <- "LAD20NM IN "
+
+# Construct a vector of local authorities to load
+# the following local authorities are the 'Solent' region
+las_to_load <- c("Southampton","Portsmouth","Winchester",
+                 "Eastleigh","Isle of Wight","Fareham",
+                 "Gosport","Test Valley","East Hampshire",
+                 "Havant","New Forest","Hart","Basingstoke and Deane")
+
+geo_where <- las_to_load # sometimes we don't want all boundaries
+geo_outfields <- "*" # returns all fields
+#geo_outfields <- c("LAD20CD","LAD20NM","LONG","LAT") # use in place of line above to return selected fields only
+geo_outSR <- "4326"
+geo_format <- "json"
+```
+
+We then paste the elements together to construct the API query URL ...
+
+```{r constructGeoQuery}
+# Assemble the full URL for the query from elements above
+geo_query_string <- paste0(geo_endpoint,geo_boundarylayer,geo_server,
+                           "query?where=",geo_search,"(",paste(paste0("'",geo_where,"'"), collapse = ","),
+                           ")&outFields=",(paste(geo_outfields, collapse = ",")),"&outSR=",geo_outSR,"&f=",geo_format)
+
+
+# Format the URL to remove spaces
+geo_query <- utils::URLencode(geo_query_string)
+```
+
+```{r runQuery}
+message("Loading LA geometry from ONS Open Geography API")
+# API query
+sf_data <- st_read(geo_query)
+```
+
+## Checking coordinate reference system
+
+Useful lookup spatial reference for CRS [https://spatialreference.org/](https://spatialreference.org/ref/epsg/27700/).
+
+Sometimes transformation is required using the `st_transform()` function.
+
+```{r checkingCRS}
+
+st_coord_sys <- st_crs(sf_data) # check coord system
+st_coord_sys # current coord system EPSG: 4326 (is what leaflet wants - good)
+
+# transform the coord system if required
+if(st_coord_sys$epsg != 4326){
+  sf_data <- st_transform(sf_data, "+proj=longlat +datum=WGS84")
+}
+```
+
+## Create map
+
+Now we can create a map, here using the [Leaflet package](https://rstudio.github.io/leaflet/).
+
+Find a [cheatsheet here](https://github.com/rstudio/cheatsheets/raw/master/leaflet.pdf).
+
+Optional: first we can create popups by adding a column to `sf_data` (uses `htmltools`).
+
+```{r}
+sf_data$popup_text <-
+  paste("Locial authority area code: ","<b>", sf_data$lad20cd, "</b>",
+        '<br/>', 'Local authority: ', '<b>', sf_data$lad20nm, '</b>', ' ') %>%
+  lapply(htmltools::HTML)
+```
+
+Finally we can create the map ...
+
+```{r}
+leaflet(sf_data) %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addPolygons(color = "blue", fillColor = "blue", fillOpacity = 0.2, weight = 1.5, popup = ~(lad20nm), # popups clicked
+              label = ~(popup_text),                                            # define labels
+              labelOptions = labelOptions(                                      # label options
+                style = list("font-weight" = "normal", padding = "2px 2px"),
+                direction = "auto"),
+              highlight = highlightOptions(
+                weight = 5,
+                color = "#666",
+                fillOpacity = 0.7,
+                bringToFront = TRUE))
+```
+
